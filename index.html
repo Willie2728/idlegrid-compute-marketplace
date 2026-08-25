@@ -7,6 +7,7 @@
   <title>IdleGrid — Borrow powerful machines by the hour</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="voice.css" />
+  <link rel="stylesheet" href="lite.css?v=1" />
 </head>
 <body>
   <div class="noise"></div>
@@ -15,6 +16,7 @@
     <nav>
       <button class="nav-link active" data-route="market">Explore</button>
       <button class="nav-link" data-route="earn">List a machine</button>
+      <button class="nav-link" data-route="fabric">LITE Fabric</button>
       <button class="nav-link" data-route="sessions">Sessions</button>
       <button class="nav-link voice-nav" data-route="voice">Voice</button>
     </nav>
@@ -66,6 +68,8 @@
             <label>GPU<input name="gpu" required placeholder="40-core GPU" /></label>
             <label>Memory (GB)<input name="ram" type="number" min="8" value="32" required /></label>
             <label>Availability / week<input name="hours" type="number" min="1" max="168" value="30" required /></label>
+            <label>Sharing mode<select name="sharing"><option value="shared">Shared capacity — keep using my PC</option><option value="exclusive">Exclusive session — whole guest VM</option><option value="storage">Virtual volume only — sandboxed data</option></select></label>
+            <label>Guest virtual disk (GB)<input name="disk" type="number" min="20" max="2048" value="100" required /></label>
           </div>
           <label>Best for<input name="tasks" required placeholder="Video editing, Xcode, 3D rendering" /></label>
           <label class="check"><input name="isolated" type="checkbox" required /> I can enable a separate guest account or isolated virtual machine.</label>
@@ -79,6 +83,68 @@
           <div class="economics"><div><span>Guest pays</span><b>$7.60/hr</b></div><div><span>You receive</span><b>$5.70/hr</b></div><div><span>IdleGrid</span><b>$1.90/hr</b></div></div>
           <p class="fine">Estimate uses a 75% host payout and expected utilization. Electricity and taxes are the host's responsibility.</p>
         </aside>
+      </div>
+    </section>
+
+    <section id="fabric" class="route">
+      <div class="page-head fabric-head">
+        <div>
+          <p class="eyebrow">IDLEGRID LITE FABRIC · DESIGN PROTOTYPE</p>
+          <h1>One grid.<br><span>Right-sized compute.</span></h1>
+          <p>Route ordinary jobs to efficient Linux microVMs, share a protected slice of a donor machine, or reserve an entire high-performance system only when the work demands it.</p>
+        </div>
+        <div class="live-pill"><i class="pulse"></i> Scheduler simulation online</div>
+      </div>
+
+      <div class="fabric-flow" aria-label="IdleGrid routing architecture">
+        <div class="flow-node intake"><small>01 · INTAKE</small><strong>User or AI agent task</strong><span>Signed workload + policy</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-node brain"><small>02 · CLASSIFY</small><strong>Grid Router</strong><span>Cost · risk · latency · demand</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="pool-stack">
+          <div class="flow-node lite"><small>LITE</small><strong>Linux microVM pool</strong><span>Web · office · agents</span></div>
+          <div class="flow-node shared"><small>SHARED</small><strong>Donor capacity slice</strong><span>Builds · data · CPU work</span></div>
+          <div class="flow-node exclusive"><small>EXCLUSIVE</small><strong>Whole guest machine</strong><span>GPU · gaming · creative</span></div>
+        </div>
+      </div>
+
+      <div class="fabric-grid">
+        <form id="routerForm" class="glass fabric-card">
+          <div class="card-title"><div><p class="eyebrow">WORKLOAD ROUTER</p><h2>Where should this task run?</h2></div><span class="demo-badge">SIMULATION</span></div>
+          <label>Task type
+            <select id="taskType"><option value="web">Web serving / API</option><option value="office">Office administration</option><option value="agent">AI agent / automation</option><option value="build">Software build</option><option value="data">Data processing</option><option value="creative">3D / video production</option><option value="gaming">Interactive gaming</option></select>
+          </label>
+          <div class="field-grid compact-fields">
+            <label>CPU cores<input id="routeCpu" type="number" min="1" max="64" value="2" /></label>
+            <label>Memory (GB)<input id="routeRam" type="number" min="1" max="256" value="4" /></label>
+            <label>GPU<select id="routeGpu"><option value="none">Not required</option><option value="light">Light acceleration</option><option value="high">High-performance GPU</option></select></label>
+            <label>Interaction<select id="routeLatency"><option value="batch">Background / batch</option><option value="normal">Normal</option><option value="realtime">Real-time</option></select></label>
+          </div>
+          <button class="primary wide" type="submit">Route this workload</button>
+          <div id="routeResult" class="route-result" aria-live="polite">
+            <span class="route-icon">L</span><div><small>RECOMMENDED ENVIRONMENT</small><h3>IdleGrid LITE Linux Pool</h3><p>Lowest-cost match for a small, non-GPU workload.</p></div>
+          </div>
+        </form>
+
+        <form id="capacityForm" class="glass fabric-card">
+          <div class="card-title"><div><p class="eyebrow">OWNER SAFE SHARE</p><h2>Keep your computer usable.</h2></div><span id="capacityStatus" class="saved-state">UNSAVED</span></div>
+          <label>Protection profile
+            <select id="capacityProfile"><option value="balanced">Balanced — owner always has priority</option><option value="quiet">Quiet — lowest heat and fan noise</option><option value="max">Maximum share — only while owner is idle</option></select>
+          </label>
+          <div class="quota"><div><span>Guest CPU cap</span><b id="cpuValue">4 cores</b></div><input id="cpuQuota" type="range" min="1" max="16" value="4" /></div>
+          <div class="quota"><div><span>Guest memory cap</span><b id="ramValue">8 GB</b></div><input id="ramQuota" type="range" min="2" max="64" step="2" value="8" /></div>
+          <div class="quota"><div><span>Encrypted virtual disk</span><b id="diskValue">100 GB</b></div><input id="diskQuota" type="range" min="20" max="1000" step="20" value="100" /></div>
+          <div class="owner-reserve"><small>ALWAYS RESERVED FOR OWNER</small><div><span id="ownerCpu">12 CPU cores</span><span id="ownerRam">56 GB memory</span><span>Private drives: never shared</span></div></div>
+          <label class="check"><input id="autoReclaim" type="checkbox" checked /> Pause or migrate the guest automatically when owner demand rises.</label>
+          <button class="primary wide" type="submit">Save protected capacity</button>
+        </form>
+      </div>
+
+      <div class="safety-strip">
+        <div><b>No raw drive access</b><span>Renters see an encrypted virtual disk—not the host partition.</span></div>
+        <div><b>Owner-first reclaim</b><span>Pressure or heat triggers pause, migration, or shutdown.</span></div>
+        <div><b>Zero-trust sessions</b><span>Signed images, filtered network, audit trail, and kill switch.</span></div>
+        <div><b>Honest boundary</b><span>This page simulates policy; a signed host agent is still required.</span></div>
       </div>
     </section>
 
@@ -99,7 +165,7 @@
     <div class="modal-card"><button id="closeModal" class="close" aria-label="Close">×</button><div id="modalBody"></div></div>
   </div>
   <div id="toast" class="toast" role="status"></div>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
   <script src="voice-player.js?v=3"></script>
 </body>
 </html>

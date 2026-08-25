@@ -7,6 +7,8 @@ IdleGrid is a working marketplace prototype for renting access to idle computers
 - Search and filter available Windows, Mac, and console listings
 - Dynamic hourly checkout and reservation creation
 - Owner listing workflow and estimated monthly payout
+- Interactive LITE Fabric workload router (simulation)
+- Shared-capacity policy configurator with owner-reserved CPU/RAM and encrypted virtual-disk quotas
 - Sessions dashboard
 - Local browser persistence for bookings and listings
 - Responsive interface with clear provider-required states
@@ -37,11 +39,24 @@ The host estimate uses: `available hours × expected 80% utilization × hourly h
 7. Session artifacts and guest accounts are destroyed or reverted; both parties receive a signed audit record.
 8. Payout releases after a short dispute window, minus the 25% platform fee.
 
+## Shared Capacity and LITE Fabric architecture
+
+IdleGrid must never rent a raw physical drive, partition, or owner desktop. A shared-capacity host instead creates an isolated guest VM or microVM with a dedicated encrypted virtual disk. CPU, RAM, disk I/O, and network quotas keep owner capacity available; an owner-first watchdog pauses, migrates, or stops the guest when local load, temperature, or latency crosses policy limits. Consumer GPU sharing is not assumed: GPU-heavy and real-time work routes to an exclusive guest machine unless the hardware exposes a supported, verified partitioning mechanism.
+
+The proposed **IdleGrid LITE Fabric** is a pool of owned Linux servers running short-lived microVMs for web serving, APIs, office/admin automation, small AI agents, cron work, and lightweight builds. A policy-aware router classifies each task into:
+
+1. **LITE pool:** low CPU/RAM, non-GPU, batch or normal-latency jobs.
+2. **Protected donor slice:** medium CPU, memory, light acceleration, builds, and data jobs under hard quotas.
+3. **Exclusive machine:** high GPU, creative, gaming, or real-time interactive work.
+
+Durable customer data belongs in encrypted network/object storage, not on donor disks. Each workload uses a signed image, short-lived identity, filtered network policy, metering, malware controls, an audit trail, and an emergency kill switch. Control-plane identity, payments, scheduling, and audit services remain separate from untrusted customer workloads.
+
 ## Important product boundaries
 
 - Do not expose an owner's normal desktop. Use an ephemeral VM, cloud gaming sandbox, or separate restricted account.
 - Console rental is materially harder: platform terms, game licensing, account sharing, and vendor streaming restrictions must be reviewed before launch. Treat it as a later pilot, not the initial core market.
 - Payment processing, remote control, identity verification, malware scanning, insurance, tax reporting, and production authentication are not implemented in this local prototype.
+- The LITE router and capacity controls are a browser-based product simulation. They save policy locally but do not yet configure Hyper-V, KVM, Firecracker, Kubernetes, storage, or a donor host agent.
 - Prohibit credential theft, spam, cryptomining without explicit host opt-in, evasion, malware, and access to owner peripherals or files.
 
 ## Recommended launch wedge
