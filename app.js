@@ -10,9 +10,10 @@ let machines=[...baseMachines,...JSON.parse(localStorage.getItem('idlegrid-listi
 let sessions=JSON.parse(localStorage.getItem('idlegrid-sessions')||'[]');
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 
-function route(name){$$('.route,.nav-link').forEach(x=>x.classList.remove('active'));$('#'+name).classList.add('active');$(`.nav-link[data-route="${name}"]`)?.classList.add('active');location.hash=name;window.scrollTo(0,0);if(name==='sessions')renderSessions()}
+const routes=['market','earn','fabric','sessions','voice'];
+function route(name){if(!routes.includes(name))name='market';$$('.route,.nav-link').forEach(x=>x.classList.remove('active'));$('#'+name).classList.add('active');$(`.nav-link[data-route="${name}"]`)?.classList.add('active');if(location.hash!==`#${name}`)history.replaceState(null,'',`#${name}`);window.scrollTo(0,0);if(name==='sessions')renderSessions()}
 $$('[data-route]').forEach(b=>b.onclick=()=>route(b.dataset.route));
-window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(['market','earn','sessions','voice'].includes(h))route(h)});
+window.addEventListener('hashchange',()=>route(location.hash.slice(1)));
 
 function renderMachines(){
  const q=$('#searchInput').value.toLowerCase(),type=$('#typeFilter').value,max=Number($('#priceFilter').value);
@@ -33,6 +34,34 @@ $('#closeModal').onclick=()=>$('#modal').hidden=true;$('#modal').onclick=e=>{if(
 function renderSessions(){if(!sessions.length){$('#sessionList').innerHTML='<div class="empty"><h3>No sessions yet</h3><p>Explore available machines and reserve one when you are ready.</p><button class="primary" onclick="route(\'market\')">Explore machines</button></div>';return}$('#sessionList').innerHTML=sessions.map(s=>`<article class="session"><div><h3>${esc(s.machine)}</h3><p>${s.hours} hour session · ${new Date(s.created).toLocaleString()}</p></div><div><strong>$${s.total.toFixed(2)}</strong> &nbsp; <span class="badge">${esc(s.status)}</span></div></article>`).join('')}
 
 $('#earnSlider').oninput=e=>{$('#earnings').textContent=Math.round(Number(e.target.value)*4*5.7*.8)};
-$('#hostForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),type=f.get('type');const suggested=type==='Console'?3.2:type==='Mac'?7.2:8.4;const listing={id:'local-'+Date.now(),name:f.get('name'),type,cpu:f.get('cpu'),gpu:f.get('gpu'),ram:Number(f.get('ram')),price:suggested,rating:null,tasks:f.get('tasks').split(',').map(x=>x.trim()).filter(Boolean).slice(0,3),glow:type==='Mac'?'#3dbbff':type==='Console'?'#63e16f':'#754cff'};const locals=JSON.parse(localStorage.getItem('idlegrid-listings')||'[]');locals.push(listing);localStorage.setItem('idlegrid-listings',JSON.stringify(locals));machines=[...baseMachines,...locals];toast('Listing saved — verification required');e.target.reset();renderMachines();route('market')};
+$('#hostForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),type=f.get('type');const suggested=type==='Console'?3.2:type==='Mac'?7.2:8.4;const listing={id:'local-'+Date.now(),name:f.get('name'),type,cpu:f.get('cpu'),gpu:f.get('gpu'),ram:Number(f.get('ram')),sharing:f.get('sharing'),disk:Number(f.get('disk')),price:suggested,rating:null,tasks:f.get('tasks').split(',').map(x=>x.trim()).filter(Boolean).slice(0,3),glow:type==='Mac'?'#3dbbff':type==='Console'?'#63e16f':'#754cff'};const locals=JSON.parse(localStorage.getItem('idlegrid-listings')||'[]');locals.push(listing);localStorage.setItem('idlegrid-listings',JSON.stringify(locals));machines=[...baseMachines,...locals];toast('Listing saved — verification required');e.target.reset();renderMachines();route('market')};
+
+const routeProfiles={
+ lite:{name:'IdleGrid LITE Linux Pool',icon:'L',className:'lite-result'},
+ shared:{name:'Protected Donor Capacity',icon:'S',className:'shared-result'},
+ exclusive:{name:'Exclusive Performance Machine',icon:'X',className:'exclusive-result'}
+};
+function recommendRoute(){
+ const task=$('#taskType').value,cpu=Number($('#routeCpu').value),ram=Number($('#routeRam').value),gpu=$('#routeGpu').value,latency=$('#routeLatency').value;
+ let target='lite',reason='Small non-GPU workloads stay in the efficient LITE pool.';
+ if(gpu==='high'||task==='gaming'||task==='creative'||latency==='realtime'){target='exclusive';reason='High GPU or real-time interaction needs a dedicated performance session.'}
+ else if(cpu>4||ram>8||gpu==='light'||task==='build'||task==='data'){target='shared';reason='This medium workload fits a protected donor slice with hard resource caps.'}
+ const p=routeProfiles[target];
+ $('#routeResult').className=`route-result ${p.className}`;
+ $('#routeResult').innerHTML=`<span class="route-icon">${p.icon}</span><div><small>RECOMMENDED ENVIRONMENT</small><h3>${p.name}</h3><p>${reason}</p><div class="route-meta"><span>${cpu} CPU</span><span>${ram} GB</span><span>${gpu==='none'?'No GPU':gpu==='light'?'Light GPU':'High GPU'}</span></div></div>`;
+}
+$('#routerForm').onsubmit=e=>{e.preventDefault();recommendRoute();toast('Workload classified — simulation only')};
+['taskType','routeCpu','routeRam','routeGpu','routeLatency'].forEach(id=>$('#'+id).onchange=recommendRoute);
+
+function updateCapacity(){
+ const cpu=Number($('#cpuQuota').value),ram=Number($('#ramQuota').value),disk=Number($('#diskQuota').value);
+ $('#cpuValue').textContent=`${cpu} ${cpu===1?'core':'cores'}`;$('#ramValue').textContent=`${ram} GB`;$('#diskValue').textContent=`${disk} GB`;
+ $('#ownerCpu').textContent=`${Math.max(1,16-cpu)} CPU cores`;$('#ownerRam').textContent=`${Math.max(4,64-ram)} GB memory`;
+ $('#capacityStatus').textContent='UNSAVED';$('#capacityStatus').classList.remove('is-saved');
+}
+['cpuQuota','ramQuota','diskQuota'].forEach(id=>$('#'+id).oninput=updateCapacity);
+$('#capacityProfile').onchange=updateCapacity;$('#autoReclaim').onchange=updateCapacity;
+$('#capacityForm').onsubmit=e=>{e.preventDefault();const config={profile:$('#capacityProfile').value,cpu:Number($('#cpuQuota').value),ram:Number($('#ramQuota').value),disk:Number($('#diskQuota').value),autoReclaim:$('#autoReclaim').checked};localStorage.setItem('idlegrid-capacity-policy',JSON.stringify(config));$('#capacityStatus').textContent='SAVED LOCALLY';$('#capacityStatus').classList.add('is-saved');toast('Protected capacity policy saved')};
+function loadCapacity(){try{const c=JSON.parse(localStorage.getItem('idlegrid-capacity-policy'));if(!c)return;$('#capacityProfile').value=c.profile;$('#cpuQuota').value=c.cpu;$('#ramQuota').value=c.ram;$('#diskQuota').value=c.disk;$('#autoReclaim').checked=c.autoReclaim;updateCapacity();$('#capacityStatus').textContent='SAVED LOCALLY';$('#capacityStatus').classList.add('is-saved')}catch{}}
 function toast(msg){$('#toast').textContent=msg;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),2600)}
-renderMachines();renderSessions();if(location.hash)route(location.hash.slice(1));
+renderMachines();renderSessions();recommendRoute();loadCapacity();route(location.hash.slice(1)||'market');
