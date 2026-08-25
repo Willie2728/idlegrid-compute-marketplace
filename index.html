@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090b10" />
+  <title>IdleGrid — Borrow powerful machines by the hour</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="voice.css" />
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar">
+    <a class="brand" href="#market"><span class="brand-mark">IG</span><span>IdleGrid</span></a>
+    <nav>
+      <button class="nav-link active" data-route="market">Explore</button>
+      <button class="nav-link" data-route="earn">List a machine</button>
+      <button class="nav-link" data-route="sessions">Sessions</button>
+      <button class="nav-link voice-nav" data-route="voice">Voice</button>
+    </nav>
+    <button class="avatar" aria-label="Account">W</button>
+  </header>
+
+  <main>
+    <section id="market" class="route active">
+      <div class="hero">
+        <div>
+          <p class="eyebrow">THE WORLD'S IDLE COMPUTERS, READY</p>
+          <h1>Borrow power.<br><span>Not hardware.</span></h1>
+          <p class="hero-copy">Secure, time-boxed access to gaming PCs, Macs, and creator workstations—without seeing the owner's personal files.</p>
+        </div>
+        <div class="orb-wrap" aria-hidden="true"><div class="orb"></div><div class="orbit one"></div><div class="orbit two"></div></div>
+      </div>
+
+      <div class="trust-row">
+        <span><i class="pulse"></i> 428 machines online</span>
+        <span>Encrypted sessions</span><span>Owner-controlled access</span><span>Automatic cleanup</span>
+      </div>
+
+      <div class="search-panel">
+        <label>What do you need?
+          <input id="searchInput" type="search" placeholder="Blender render, Unreal Engine, Xcode…" />
+        </label>
+        <label>Machine type
+          <select id="typeFilter"><option value="all">Any machine</option><option>Windows</option><option>Mac</option><option>Console</option></select>
+        </label>
+        <label>Budget / hour
+          <select id="priceFilter"><option value="999">Any price</option><option value="5">Under $5</option><option value="10">Under $10</option><option value="20">Under $20</option></select>
+        </label>
+        <button id="searchBtn" class="primary">Find a machine</button>
+      </div>
+
+      <div class="section-head"><div><p class="eyebrow">AVAILABLE NOW</p><h2>Machines built for the task</h2></div><span id="resultCount"></span></div>
+      <div id="machineGrid" class="machine-grid"></div>
+    </section>
+
+    <section id="earn" class="route">
+      <div class="page-head"><p class="eyebrow">HOST ON IDLEGRID</p><h1>Put your idle machine to work.</h1><p>Choose when it is available. IdleGrid estimates demand, isolates guest sessions, and calculates your payout.</p></div>
+      <div class="split">
+        <form id="hostForm" class="glass form-card">
+          <h2>List your machine</h2>
+          <div class="field-grid">
+            <label>Display name<input name="name" required placeholder="Studio Mac Ultra" /></label>
+            <label>Device type<select name="type"><option>Windows</option><option>Mac</option><option>Console</option></select></label>
+            <label>CPU<input name="cpu" required placeholder="Apple M3 Max" /></label>
+            <label>GPU<input name="gpu" required placeholder="40-core GPU" /></label>
+            <label>Memory (GB)<input name="ram" type="number" min="8" value="32" required /></label>
+            <label>Availability / week<input name="hours" type="number" min="1" max="168" value="30" required /></label>
+          </div>
+          <label>Best for<input name="tasks" required placeholder="Video editing, Xcode, 3D rendering" /></label>
+          <label class="check"><input name="isolated" type="checkbox" required /> I can enable a separate guest account or isolated virtual machine.</label>
+          <button class="primary wide" type="submit">Calculate & publish</button>
+          <p class="fine">Listings are saved on this device for demonstration. Identity, hardware, and network checks are required before a real listing goes live.</p>
+        </form>
+        <aside class="earn-card">
+          <p class="eyebrow">ESTIMATED HOST EARNINGS</p><div class="big-number"><span>$</span><strong id="earnings">182</strong><small>/ month</small></div>
+          <input id="earnSlider" type="range" min="5" max="80" value="30" />
+          <div class="range-label"><span>5 hrs/week</span><span>80 hrs/week</span></div>
+          <div class="economics"><div><span>Guest pays</span><b>$7.60/hr</b></div><div><span>You receive</span><b>$5.70/hr</b></div><div><span>IdleGrid</span><b>$1.90/hr</b></div></div>
+          <p class="fine">Estimate uses a 75% host payout and expected utilization. Electricity and taxes are the host's responsibility.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="sessions" class="route">
+      <div class="page-head"><p class="eyebrow">YOUR ACTIVITY</p><h1>Sessions</h1><p>Bookings remain locked until the owner machine and approved remote-access provider are online.</p></div>
+      <div id="sessionList" class="session-list"></div>
+    </section>
+    <section id="voice" class="route">
+      <div class="page-head"><p class="eyebrow">IDLEGRID VOICE</p><h1>Listen to the plan.</h1><p>Hear the marketing forecast, advertising budget, and recommended launch strategy.</p></div>
+      <div class="voice-panel"><button class="voice-orb" id="voiceOrb" aria-label="Play or pause reply"><span>▶</span></button><div class="voice-content"><p class="eyebrow">READ ALOUD</p><h2>IdleGrid marketing forecast</h2>
+        <textarea id="voiceText" aria-label="Text to read aloud">IdleGrid's realistic twelve-month target is ten to fifteen thousand dollars in monthly recurring revenue. That assumes seven hundred fifty monthly renters, eight booked hours per renter, an average price of seven dollars and sixty cents per hour, and a twenty-five percent platform fee. This produces approximately eleven thousand four hundred dollars in monthly platform revenue. For a secure ninety-day pilot, plan on approximately one hundred fifty thousand dollars in total capital, including thirty thousand dollars for advertising and creative testing. Start by advertising on Reddit, YouTube creator channels, Google Search, TikTok, and Instagram. Recruit twenty-five to fifty verified machine owners before spending heavily to acquire renters. Focus first on Blender rendering, Unreal Engine builds, video exports, Xcode development, and high-end PC gaming. Scale advertising only after repeat bookings, successful sessions, and customer acquisition costs prove the business model.</textarea>
+        <audio id="replyAudio" src="idlegrid-marketing-reply.wav" preload="metadata" controls></audio>
+        <div class="voice-actions"><button id="playVoice" class="primary">▶ Play reply</button><button id="stopVoice" class="mini-btn">■ Stop</button><span class="voice-name">Microsoft David Desktop</span></div><p id="voiceStatus" class="fine">Audio loaded. Press Play to listen.</p></div></div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+    <div class="modal-card"><button id="closeModal" class="close" aria-label="Close">×</button><div id="modalBody"></div></div>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="app.js?v=2"></script>
+  <script src="voice-player.js?v=2"></script>
+</body>
+</html>
